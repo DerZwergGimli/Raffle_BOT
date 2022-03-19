@@ -1,5 +1,7 @@
 # DDRB - DisocrdRustRaffleBot
 
+![bot-icon](./bot_icon.png)
+
 ## Info
 This is an implementation of a Raffle Management bot for discord servers.
 
