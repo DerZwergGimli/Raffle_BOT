@@ -6,3 +6,27 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15"
+log = "0.4.1"
+tracing = "0.1.23"
+tracing-subscriber = "0.2"
+serenity = {version = "0.10.10", features = ["utils", "cache", "framework", "standard_framework", "rustls_backend"]}
+reqwest = {version = "0.11.9", features = ["json"]}
+
+structopt = "0.3.26"
+
+mongodb = "2.1"
+chrono = "0.4.19"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bson = "2.1.0"
+ascii_table = "4.0.2"
+indicatif ="0.16.2"
+
+
+
+[dependencies.tokio]
+version = "1.0"
+features = ["full"]
+
+
