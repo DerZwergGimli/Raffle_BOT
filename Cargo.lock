@@ -3,27 +3,6 @@
 version = 3
 
 [[package]]
-name = "DRRB"
-version = "0.1.0"
-dependencies = [
- "ascii_table",
- "bson",
- "chrono",
- "dotenv",
- "indicatif",
- "log",
- "mongodb",
- "reqwest",
- "serde",
- "serde_json",
- "serenity",
- "structopt",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "adler"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -318,6 +297,27 @@ name = "data-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ee2393c4a91429dffb4bedf19f4d6abf27d8a732c8ce4980305d782e5426d57"
+
+[[package]]
+name = "ddrb"
+version = "0.1.0"
+dependencies = [
+ "ascii_table",
+ "bson",
+ "chrono",
+ "dotenv",
+ "indicatif",
+ "log",
+ "mongodb",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serenity",
+ "structopt",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "derivative"

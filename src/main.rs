@@ -8,14 +8,9 @@
 //! git = "https://github.com/serenity-rs/serenity.git"
 //! features = ["framework", "standard_framework"]
 //! ```
-mod commands;
-mod api_helper;
-mod model;
-
-
-
 use std::{collections::HashSet, env, sync::Arc};
-use commands::{math::*, meta::*, owner::*, help::*, raffle::*, ticket::*, status::*};
+use std::time::Duration;
+
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
@@ -24,7 +19,18 @@ use serenity::{
     model::{event::ResumedEvent, gateway::Ready},
     prelude::*,
 };
+use serenity::model::id::GuildId;
+use serenity::model::prelude::MessageId;
 use tracing::{error, info};
+
+use commands::{help::*, math::*, meta::*, owner::*, raffle::*, status::*, ticket::*};
+
+use crate::commands::status;
+
+mod commands;
+mod api_helper;
+mod model;
+
 
 pub struct ShardManagerContainer;
 
@@ -43,23 +49,39 @@ impl EventHandler for Handler {
     async fn resume(&self, _: Context, _: ResumedEvent) {
         info!("Resumed");
     }
+
+    async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
+        let sleep_time = env::var("LOOP_SLEEP").unwrap_or("0".to_string()).parse::<u64>().unwrap();
+        if sleep_time != 0 {
+            info!("Starting message update loop...");
+            let mut message_id: u64 = 0;
+            loop {
+                status::change_status_message(&ctx.http, &_guilds, &mut message_id).await;
+                info!("Message posted");
+                tokio::time::sleep(Duration::from_secs(sleep_time)).await;
+            }
+        }
+
+    }
 }
 
 
 #[group]
 #[commands(multiply,
-            ping,
-            quit,
-            raffle,
-            ticket,
-            status)]
+ping,
+quit,
+help,
+raffle,
+ticket,
+status)]
 struct General;
 
 #[tokio::main]
 async fn main() {
     // This will load the environment variables located at `./.env`, relative to
     // the CWD. See `./.env.example` for an example on how to structure this.
-    dotenv::dotenv().expect("Failed to load .env file");
+    //dotenv::dotenv().expect("Failed to load .env file");
+
 
     // Initialize the logger to use environment variables.
     //
@@ -78,7 +100,7 @@ async fn main() {
             owners.insert(info.owner.id);
 
             (owners, info.id)
-        },
+        }
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 

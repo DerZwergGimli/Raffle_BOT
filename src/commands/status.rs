@@ -1,24 +1,94 @@
+use std::env;
+use std::sync::Arc;
+
 use ascii_table::{Align, AsciiTable};
-use serde_json::to_string;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
-use crate::api_helper;
-use crate::model::{Raffle, Ticket};
-use structopt::StructOpt;
+use bson::oid::ObjectId;
+use indicatif::ProgressBar;
 use log::*;
 use serde::de::Unexpected::Str;
-use serenity::http::CacheHttp;
-
-use bson::oid::ObjectId;
+use serde_json::{json, to_string};
+use serenity::framework::standard::{Args, CommandResult, macros::command};
+use serenity::http::{CacheHttp, Http};
 use serenity::model::guild::Target::User;
-use indicatif::ProgressBar;
+use serenity::model::prelude::*;
+use serenity::prelude::*;
+use serenity::utils::MessageBuilder;
+use structopt::StructOpt;
+
+use crate::api_helper;
+use crate::commands::{message_begin, message_end};
+use crate::model::{Raffle, Ticket};
 
 #[command]
 pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    message_begin(&ctx, msg).await;
+    let typing = msg.channel_id.start_typing(&ctx.http)?;
+
+    //
+    let mut text = match args.single::<String>().unwrap_or_default().as_str() {
+        "list" => build_status_message_short().await,
+        "perm" => {
+            msg.channel_id.say(&ctx.http, build_status_message_short().await).await?;
+            "--- permanent message ---".to_string()
+        }
+        "full" => build_status_message().await,
+        _ => "Expecting: ```~status <list/perm/full>```".to_string()
+    };
+    //
+    typing.stop();
+    message_end(&ctx, msg, text).await;
+
+    //    text.push_str("> this message will destruct in 5s");
+    //let msg_id = msg.channel_id.say(&ctx.http, text).await?;
+
+
+    Ok(())
+}
+
+async fn build_status_message_short() -> String {
     let raffles = api_helper::get_raffle("0".to_owned()).await.unwrap();
     let tickets = api_helper::get_ticket("0".to_owned()).await.unwrap();
 
+    let mut text = String::new();
+    text.push_str(format!("**Raffle Status**\n\n").as_ref());
+
+    for raffle in raffles {
+        let mut table: Vec<[String; 3]> = Vec::new();
+
+        text.push_str(format!(":tickets: **{}** - {}\n", raffle.title, raffle.id).as_ref());
+        text.push_str(format!("{}\n", raffle.description).as_ref());
+
+        let mut tickets_sold = 0;
+        for ticket in tickets.clone() {
+            let mut count = 0;
+            if ticket.raffle_id == raffle.id {
+                tickets_sold += ticket.amount as i32;
+            }
+        }
+
+        create_progress_view(&mut text, raffle, tickets_sold);
+    }
+    text
+}
+
+fn create_progress_view(text: &mut String, raffle: Raffle, mut tickets_sold: i32) {
+    text.push_str(format!("```Tickets SOLD: {}/{} \t", tickets_sold, raffle.ticket_amount).as_ref());
+    text.push_str(&*format!("price_per_ticket: {}{}\n", raffle.ticket_price, raffle.ticket_token_name));
+
+    let scale: f32 = 50 as f32 / raffle.ticket_amount as f32;
+    text.push_str("[");
+    for n in 1..50 {
+        if (n < tickets_sold as i32 * scale as i32) {
+            text.push_str("#");
+        } else { text.push_str(" "); }
+    }
+    text.push_str("] Progress ```");
+}
+
+
+async fn build_status_message() -> String {
+    let raffles = api_helper::get_raffle("0".to_owned()).await.unwrap();
+    let tickets = api_helper::get_ticket("0".to_owned()).await.unwrap();
 
     let mut text = String::new();
     text.push_str(format!("**Raffle Status**\n\n").as_ref());
@@ -56,25 +126,35 @@ pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
                     dt.format("%Y-%m-%d %H:%M:%S UTC").to_string()]);
             }
         }
-        text.push_str(format!("```Tickets SOLD: {}/{} \n", tickets_sold, raffle.ticket_amount).as_ref());
+        create_progress_view(&mut text, raffle, tickets_sold);
 
-        let scale:f32 = 50 as f32/ raffle.ticket_amount as f32;
-        text.push_str("[");
-        for n in 1..50{
-            if(n < tickets_sold as i32 * scale as i32){
-                text.push_str("#");
-            }
-            else { text.push_str(" "); }
-        }
-        text.push_str("]\n");
-
-        text.push_str(format!("{} ``` \n", ascii_table.format(table.clone())).as_ref());
+        text.push_str(format!("\n\
+        ```{}``` \n", ascii_table.format(table.clone())).as_ref());
     }
-
-    //    text.push_str("> this message will destruct in 5s");
-    let msg_id = msg.channel_id.say(&ctx.http, text).await?;
-
-    Ok(())
+    text
 }
 
 
+pub async fn change_status_message(ctx: &Arc<Http>, guilds: &Vec<GuildId>, msg_id: &mut u64)
+{
+    let channel_id = env::var("CHANNEL_ID").unwrap_or("0".to_string()).parse::<u64>().unwrap();
+
+    if msg_id.clone() != 0 as u64 {
+        let msg = ctx.get_message(channel_id, msg_id.clone()).await;
+        match msg {
+            Ok(_) => msg.unwrap().delete(ctx.http()).await.unwrap(),
+            Err(e) => error!("{}",e)
+        };
+    }
+
+    let message_text = build_status_message_short().await;
+
+
+    let mut message = ChannelId(channel_id)
+        .send_message(&ctx, |m| {
+            m.content(message_text)
+        })
+        .await;
+
+    *msg_id = message.unwrap().id.as_u64().clone();
+}

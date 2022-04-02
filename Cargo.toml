@@ -1,5 +1,5 @@
 [package]
-name = "DRRB"
+name = "ddrb"
 version = "0.1.0"
 edition = "2021"
 
