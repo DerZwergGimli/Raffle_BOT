@@ -104,3 +104,7 @@ ROLE_ID=<YOURROLEID>
 CHANNEL_ID=<YOURCHANNELID>
 LOOP_SLEEP=10
 ```
+
+### Donations:
+
+Solana-Wallet domain: `coffeeplease.sol`
