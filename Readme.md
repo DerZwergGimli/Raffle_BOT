@@ -107,6 +107,7 @@ LOOP_SLEEP=10
 
 ### Donations:
 Solana-Wallet domain: `coffeeplease.sol`
+
 ETH-Address `0xB0Be2420cA00C86aD983F246DEF49EA0F9779DCd`
 
 ![raffke_gif](https://media0.giphy.com/media/DGZVi7pqVq7rq/giphy.webp?cid=ecf05e47245hwmn4lv37pdw3sqc7libu5k9gt2tp3ew43aqh&rid=giphy.webp&ct=g)
