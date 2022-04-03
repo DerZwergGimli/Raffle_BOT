@@ -6,9 +6,7 @@ use serenity::http::Typing;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-pub mod math;
-pub mod meta;
-pub mod owner;
+
 
 pub mod help;
 pub mod raffle;

@@ -23,7 +23,7 @@ use serenity::model::id::GuildId;
 use serenity::model::prelude::MessageId;
 use tracing::{error, info};
 
-use commands::{help::*, math::*, meta::*, owner::*, raffle::*, status::*, ticket::*};
+use commands::{help::*, raffle::*, status::*, ticket::*};
 
 use crate::commands::status;
 
@@ -67,9 +67,7 @@ impl EventHandler for Handler {
 
 
 #[group]
-#[commands(multiply,
-ping,
-quit,
+#[commands(
 help,
 raffle,
 ticket,
