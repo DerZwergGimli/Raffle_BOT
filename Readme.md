@@ -60,6 +60,21 @@
 
 [all users can use this command]
 
+~output <raffle_id>
+
+---
+
+### Export Commands
+
+| command                                      | result                            |
+|----------------------------------------------|-----------------------------------|
+| `~ticket`                                    | prints info about ticket commands |
+| `~ticket me`                                 | shows tickets for user            |
+| `~ticket add <raffle_id> <spl_tx_signature>` | adds a new ticket for user        |
+| `~ticket list`                               | lists all tickets                 |
+| `~ticket delete`                             | deletes a ticket                  |
+
+[all users can use this command]
 
 ---
 

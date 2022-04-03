@@ -15,7 +15,8 @@ pub async fn help(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     Commands: \n
     ~status \t [prints a status of raffles]\n
     ~raffle \t [prints commands for raffle]\n
-    ~ticket \t [prints commands for tickets]```").as_ref());
+    ~ticket \t [prints commands for tickets]\n
+    ~output \t [print raffle tickets as file]```").as_ref());
 
 
     //    text.push_str("> this message will destruct in 5s");

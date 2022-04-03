@@ -12,6 +12,7 @@ pub mod help;
 pub mod raffle;
 pub mod ticket;
 pub mod status;
+pub mod output;
 
 async fn message_begin(ctx: &&Context, msg: &Message) -> CommandResult {
     if env::var("DELETE_MESSAGE").unwrap_or("false".to_string()).contains("true") {

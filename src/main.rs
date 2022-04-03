@@ -23,7 +23,7 @@ use serenity::model::id::GuildId;
 use serenity::model::prelude::MessageId;
 use tracing::{error, info};
 
-use commands::{help::*, raffle::*, status::*, ticket::*};
+use commands::{help::*, raffle::*, status::*, ticket::*, output::*};
 
 use crate::commands::status;
 
@@ -71,7 +71,8 @@ impl EventHandler for Handler {
 help,
 raffle,
 ticket,
-status)]
+status,
+export)]
 struct General;
 
 #[tokio::main]
