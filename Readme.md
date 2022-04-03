@@ -66,13 +66,10 @@
 
 ### Export Commands
 
-| command                                      | result                            |
-|----------------------------------------------|-----------------------------------|
-| `~ticket`                                    | prints info about ticket commands |
-| `~ticket me`                                 | shows tickets for user            |
-| `~ticket add <raffle_id> <spl_tx_signature>` | adds a new ticket for user        |
-| `~ticket list`                               | lists all tickets                 |
-| `~ticket delete`                             | deletes a ticket                  |
+| command               | result                             |
+|-----------------------|------------------------------------|
+| `~export`             | prints info about export commands  |
+| `~export <raffle_id>` | returns raffle tickets as a file   |
 
 [all users can use this command]
 
