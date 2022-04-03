@@ -1,5 +1,6 @@
 use std::{env, thread, time};
 
+use serenity::builder::CreateEmbed;
 use serenity::framework::standard::CommandResult;
 use serenity::http::Typing;
 use serenity::model::prelude::*;
@@ -30,6 +31,8 @@ async fn message_end(ctx: &&Context, msg: &Message, mut text: String) -> Command
 
         text.push_str(&*format!("\n > this message will destruct in {}s", destruct_timer));
     }
+
+
 
     let msg_id = msg.channel_id.say(&ctx.http, text).await?;
 

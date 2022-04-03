@@ -50,13 +50,20 @@ async fn build_status_message_short() -> String {
     let tickets = api_helper::get_ticket("0".to_owned()).await.unwrap();
 
     let mut text = String::new();
-    text.push_str(format!("**Raffle Status**\n\n").as_ref());
+    text.push_str(format!("**:tickets: Raffle Status :tickets:**\n\n").as_ref());
 
     for raffle in raffles {
         let mut table: Vec<[String; 3]> = Vec::new();
 
-        text.push_str(format!(":tickets: **{}** - {}\n", raffle.title, raffle.id).as_ref());
-        text.push_str(format!("{}\n", raffle.description).as_ref());
+        let emote_state = match raffle.status.as_str() {
+            "created" => ":yellow_circle:".to_string(),
+            "running" => ":green_circle:".to_string(),
+            "stopped" => ":red_circle:".to_string(),
+            _ => "red_circle".to_string()
+        };
+
+        text.push_str(format!("{} \t**{}** \t ID={}\n", emote_state, raffle.title, raffle.id).as_ref());
+        text.push_str(format!("\t\t  {}\n", raffle.description).as_ref());
 
         let mut tickets_sold = 0;
         for ticket in tickets.clone() {
@@ -68,6 +75,7 @@ async fn build_status_message_short() -> String {
 
         create_progress_view(&mut text, raffle, tickets_sold);
     }
+    text.push_str(format!("\n> This message will auto-update").as_ref());
     text
 }
 
@@ -82,7 +90,8 @@ fn create_progress_view(text: &mut String, raffle: Raffle, mut tickets_sold: i32
             text.push_str("#");
         } else { text.push_str(" "); }
     }
-    text.push_str("] Progress ```");
+    let percentage = tickets_sold as f32 / raffle.ticket_amount as f32 * 100.0;
+    text.push_str(format!("] {:.0}% ```\n", percentage).as_str());
 }
 
 
@@ -99,7 +108,12 @@ async fn build_status_message() -> String {
     for raffle in raffles {
         let mut table: Vec<[String; 3]> = Vec::new();
 
-        text.push_str(format!("**{}** - {}\n", raffle.title, raffle.id).as_ref());
+        let emote_state = match raffle.status.as_str() {
+            "created" => ":octagonal_sign:".to_string(),
+            _ => "error".to_string()
+        };
+
+        text.push_str(format!("**{}** - {} {}\n", raffle.title, raffle.id, emote_state).as_ref());
         text.push_str(format!("{}\n", raffle.description).as_ref());
 
         let mut tickets_sold = 0;
@@ -152,9 +166,11 @@ pub async fn change_status_message(ctx: &Arc<Http>, guilds: &Vec<GuildId>, msg_i
 
     let mut message = ChannelId(channel_id)
         .send_message(&ctx, |m| {
-            m.content(message_text)
-        })
-        .await;
+            m.embed(|e| e
+                .colour(0x00ffBB)
+                .description(message_text)
+            )
+        }).await;
 
     *msg_id = message.unwrap().id.as_u64().clone();
 }

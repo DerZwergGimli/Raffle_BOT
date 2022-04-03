@@ -71,7 +71,7 @@ pub async fn me(ctx: &Message, username: String) -> String {
 
 
     let mut text = String::new();
-    text.push_str(format!(":tickets: **Ticket LIST [{}] **\n\n", username.clone()).as_ref());
+    text.push_str(format!(":tickets: **Ticket LIST for User {} **\n\n", username.clone()).as_ref());
     let mut ascii_table = AsciiTable::default();
     ascii_table.set_max_width(150);
 
@@ -79,14 +79,10 @@ pub async fn me(ctx: &Message, username: String) -> String {
     for raffle in raffles {
         let mut data: Vec<[String; 4]> = Vec::new();
 
-        text.push_str(format!("**{}** - {}\n", raffle.title, raffle.id).as_ref());
-        text.push_str(format!("{}\n", raffle.description).as_ref());
-
         ascii_table.column(0).set_header("Ticked_ID").set_align(Align::Left);
         ascii_table.column(1).set_header("PlayerName").set_align(Align::Center);
         ascii_table.column(2).set_header("TicketAmount").set_align(Align::Center);
         ascii_table.column(3).set_header("Created [UTC]").set_align(Align::Right);
-
 
         for ticket in tickets.clone() {
             if ticket.raffle_id == raffle.id && ticket.username.contains(&username.clone()) {
@@ -97,7 +93,11 @@ pub async fn me(ctx: &Message, username: String) -> String {
                     ticket.date_created.to_string()]);
             }
         }
-        text.push_str(format!("```{} ``` \n", ascii_table.format(data.clone())).as_ref());
+        if!data.is_empty(){
+            text.push_str(format!("**{}** - {}\n", raffle.title, raffle.id).as_ref());
+            text.push_str(format!("{}\n", raffle.description).as_ref());
+            text.push_str(format!("```{} ``` \n", ascii_table.format(data.clone())).as_ref());
+        }
     }
 
     text

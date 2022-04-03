@@ -152,10 +152,9 @@ pub async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> String {
 }
 
 async fn update_status(ctx: &Context, msg: &Message, mut args: Args, status: String) -> String {
-    let id = args.single::<String>().unwrap_or("0".to_string());
-    if id != "0".to_string()  {
-        let raffle_id = args.single::<String>().unwrap_or("0".to_owned());
-        let mut raffles = api_helper::get_raffle(raffle_id).await.unwrap();
+    let mut id = args.single::<String>().unwrap_or("0".to_string());
+    if id.clone() != "0".to_string() {
+       let mut raffles = api_helper::get_raffle(id.clone()).await.unwrap();
 
         raffles[0].status = status;
 
