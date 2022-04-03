@@ -14,7 +14,7 @@
 
 - 🟢 = Raffle is running and tickes can be submitted
 - 🟡 = Raffle was created but needs to be started for use
-- 🔴 = Raffle was taken offline
+- 🔴 = Raffle was taken offline or else
 
 ---
 
