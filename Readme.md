@@ -10,6 +10,12 @@
 
 ![bot-message](./ddrb_message.png)
 
+## Raffle States
+
+- 🟢 = Raffle is running and tickes can be submitted
+- 🟡 = Raffle was created but needs to be started for use
+- 🔴 = Raffle was taken offline
+
 ---
 
 ## Commands
