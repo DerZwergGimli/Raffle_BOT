@@ -1,10 +1,10 @@
-# DDRB - DisocrdRustRaffleBot
+# DRRB - DiscordRustRaffleBot
 
 ![bot-icon_new](./icon.drawio.png)
 
 #### This is an implementation of a Raffle Management bot for discord servers written in Rust.
 
-! It will need its API-Backend - this bot is just a frontend.
+! It BOT will need its API-Backend - this bot is just a frontend.
 
 # About
 
