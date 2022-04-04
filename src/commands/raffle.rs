@@ -1,23 +1,15 @@
-use Result;
-use std::{env, thread, time};
-use std::error::Error;
-
+use std::{env};
 use ascii_table::{Align, AsciiTable};
-use log::info;
-use serde_json::to_string;
-use serenity::framework::standard::{Args, CommandError, CommandResult, macros::command};
+use serenity::framework::standard::{Args, CommandResult, macros::command};
 use serenity::model::prelude::*;
-use serenity::model::prelude::Target::Role;
 use serenity::prelude::*;
-use structopt::StructOpt;
-
 use crate::api_helper;
 use crate::commands::{message_begin, message_end};
 use crate::model::Raffle;
 
 #[command]
 pub async fn raffle(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    message_begin(&ctx, msg).await;
+    message_begin().await;
     let typing = msg.channel_id.start_typing(&ctx.http)?;
 
     // Make sure to check for permission here
@@ -28,17 +20,17 @@ pub async fn raffle(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
     ).await.unwrap_or(false);
 
 
-    let mut text: String;
+    let text: String;
     if user_role {
         text = match args.single::<String>().unwrap_or_default().as_str() {
-            "add" => add(ctx, msg, args).await,
-            "list" => list(ctx, msg, args).await,
+            "add" => add(args).await,
+            "list" => list(args).await,
             "delete" => if args.len() == 2 {
-                delete(ctx, msg, args).await
+                delete(args).await
             } else { "Expecting: ```~raffle delete <raffle_id>```".to_string() },
-            "start" => update_status(ctx, msg, args, "running".to_string()).await,
-            "stop" => update_status(ctx, msg, args, "stopped".to_string()).await,
-            "title" => update_title(ctx, msg, args).await,
+            "start" => update_status(args, "running".to_string()).await,
+            "stop" => update_status(args, "stopped".to_string()).await,
+            "title" => update_title(args).await,
             _ => "Expecting: ```~raffle <add/list/delete/start/stop>```".to_string()
         };
     } else {
@@ -69,7 +61,7 @@ async fn message_begin(ctx: &&Context, msg: &Message) {
     }
 }*/
 
-async fn add(ctx: &Context, msg: &Message, mut args: Args) -> String {
+async fn add(mut args: Args) -> String {
     if args.len() == 6 {
         let title = args.single::<String>().unwrap();
         let ticket_price = args.single::<f32>().unwrap();
@@ -95,7 +87,7 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> String {
     } else { "Expecting: ```~raffle add <title> <ticket_price> <ticket_amount> <ticket_currency> \"<description>\"```".to_string() }
 }
 
-pub async fn list(ctx: &Context, msg: &Message, mut args: Args) -> String {
+pub async fn list(mut args: Args) -> String {
     let raffle_id = args.single::<String>().unwrap_or("0".to_owned());
 
     let raffles = api_helper::get_raffle(raffle_id).await.unwrap();
@@ -124,27 +116,7 @@ pub async fn list(ctx: &Context, msg: &Message, mut args: Args) -> String {
     text
 }
 
-pub async fn list_old(ctx: &Context, msg: &Message, mut args: Args) -> String {
-    let number = args.single::<String>().unwrap_or("0".to_owned());
-
-    let raffles = api_helper::get_raffle(number).await.unwrap();
-    let mut text = String::new();
-    for raffle in raffles {
-        text.push_str(format!("**{}** \n", raffle.title).as_ref());
-        text.push_str(format!("> ID: **{}** \n", raffle.id.to_string()).as_ref());
-        text.push_str(format!("> Status: {} \n", raffle.status).as_ref());
-        text.push_str(format!("> Description: {:?} \n", raffle.description).as_ref());
-        text.push_str(format!("> Ticket-Amount: {:?}\n", raffle.ticket_amount).as_ref());
-        text.push_str(format!("> Ticket-Price: {:?}\n", raffle.ticket_price).as_ref());
-        text.push_str(format!("> Accepted Token: {}\n", raffle.ticket_token_name).as_ref());
-        text.push_str(format!("> Rule: {}\n", raffle.rule).as_ref());
-        text.push_str(format!("\n").as_ref());
-    }
-
-    text
-}
-
-pub async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> String {
+pub async fn delete(mut args: Args) -> String {
     let number = args.single::<String>().unwrap_or("0".to_owned());
 
     let message = api_helper::del_raffle(number).await.unwrap_or("Error in raffle_id".to_string());
@@ -152,8 +124,8 @@ pub async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> String {
     message
 }
 
-async fn update_status(ctx: &Context, msg: &Message, mut args: Args, status: String) -> String {
-    let mut id = args.single::<String>().unwrap_or("0".to_string());
+async fn update_status(mut args: Args, status: String) -> String {
+    let id = args.single::<String>().unwrap_or("0".to_string());
     if id.clone() != "0".to_string() {
        let mut raffles = api_helper::get_raffle(id.clone()).await.unwrap();
 
@@ -165,7 +137,7 @@ async fn update_status(ctx: &Context, msg: &Message, mut args: Args, status: Str
     }
 }
 
-async fn update_title(ctx: &Context, msg: &Message, mut args: Args) -> String {
+async fn update_title(mut args: Args) -> String {
     let id = args.single::<String>().unwrap();
     let new_title = args.single::<String>().unwrap();
 

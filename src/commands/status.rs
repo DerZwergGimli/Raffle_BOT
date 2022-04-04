@@ -1,31 +1,22 @@
 use std::env;
 use std::sync::Arc;
-
 use ascii_table::{Align, AsciiTable};
-use bson::oid::ObjectId;
-use indicatif::ProgressBar;
 use log::*;
-use serde::de::Unexpected::Str;
-use serde_json::{json, to_string};
 use serenity::framework::standard::{Args, CommandResult, macros::command};
 use serenity::http::{CacheHttp, Http};
-use serenity::model::guild::Target::User;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::MessageBuilder;
-use structopt::StructOpt;
-
 use crate::api_helper;
 use crate::commands::{message_begin, message_end};
-use crate::model::{Raffle, Ticket};
+use crate::model::{Raffle};
 
 #[command]
 pub async fn status(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    message_begin(&ctx, msg).await;
+    message_begin().await;
     let typing = msg.channel_id.start_typing(&ctx.http)?;
 
     //
-    let mut text = match args.single::<String>().unwrap_or_default().as_str() {
+    let text = match args.single::<String>().unwrap_or_default().as_str() {
         "list" => build_status_message_short().await,
         "perm" => {
             msg.channel_id.say(&ctx.http, build_status_message_short().await).await?;
@@ -53,8 +44,6 @@ async fn build_status_message_short() -> String {
     text.push_str(format!("**:tickets: Raffle Status :tickets:**\n\n").as_ref());
 
     for raffle in raffles {
-        let mut table: Vec<[String; 3]> = Vec::new();
-
         let emote_state = match raffle.status.as_str() {
             "created" => ":yellow_circle:".to_string(),
             "running" => ":green_circle:".to_string(),
@@ -67,7 +56,6 @@ async fn build_status_message_short() -> String {
 
         let mut tickets_sold = 0;
         for ticket in tickets.clone() {
-            let mut count = 0;
             if ticket.raffle_id == raffle.id {
                 tickets_sold += ticket.amount as i32;
             }
@@ -79,14 +67,14 @@ async fn build_status_message_short() -> String {
     text
 }
 
-fn create_progress_view(text: &mut String, raffle: Raffle, mut tickets_sold: i32) {
+fn create_progress_view(text: &mut String, raffle: Raffle, tickets_sold: i32) {
     text.push_str(format!("```Tickets SOLD: {}/{} \t", tickets_sold, raffle.ticket_amount).as_ref());
     text.push_str(&*format!("price_per_ticket: {}{}\n", raffle.ticket_price, raffle.ticket_token_name));
 
     let scale: f32 = 50 as f32 / raffle.ticket_amount as f32;
     text.push_str("[");
     for n in 1..50 {
-        if (n < tickets_sold as i32 * scale as i32) {
+        if n < tickets_sold as i32 * scale as i32 {
             text.push_str("#");
         } else { text.push_str(" "); }
     }
@@ -120,7 +108,6 @@ async fn build_status_message() -> String {
 
         let mut tickets_sold = 0;
         for ticket in tickets.clone() {
-            let mut count = 0;
             if ticket.raffle_id == raffle.id {
                 tickets_sold += ticket.amount as i32;
             }
@@ -151,7 +138,7 @@ async fn build_status_message() -> String {
 }
 
 
-pub async fn change_status_message(ctx: &Arc<Http>, guilds: &Vec<GuildId>, msg_id: &mut u64)
+pub async fn change_status_message(ctx: &Arc<Http>, msg_id: &mut u64)
 {
     let channel_id = env::var("CHANNEL_ID").unwrap_or("0".to_string()).parse::<u64>().unwrap();
 
@@ -166,7 +153,7 @@ pub async fn change_status_message(ctx: &Arc<Http>, guilds: &Vec<GuildId>, msg_i
     let message_text = build_status_message_short().await;
 
 
-    let mut message = ChannelId(channel_id)
+    let message = ChannelId(channel_id)
         .send_message(&ctx, |m| {
             m.embed(|e| e
                 .colour(0x00ffBB)

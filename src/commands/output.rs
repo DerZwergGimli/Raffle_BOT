@@ -1,31 +1,22 @@
-use std::{env, fs};
+use std::{fs};
 use std::io::Write;
-use std::sync::Arc;
-
-use ascii_table::{Align, AsciiTable};
 use bson::oid::ObjectId;
-use indicatif::ProgressBar;
 use log::*;
-use serde::de::Unexpected::Str;
-use serde_json::{json, to_string};
 use serenity::framework::standard::{Args, CommandResult, macros::command};
-use serenity::futures::AsyncWriteExt;
-use serenity::http::{CacheHttp, Http};
-use serenity::model::guild::Target::User;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::MessageBuilder;
-use structopt::StructOpt;
+
+
 use tokio::fs::File;
 
 use crate::api_helper;
-use crate::commands::{message_begin, message_end};
-use crate::model::{Raffle, Ticket};
+use crate::commands::{message_end};
+
 
 #[command]
 pub async fn export(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let typing = msg.channel_id.start_typing(&ctx.http)?;
-    let mut raffle_id = args.single::<String>().unwrap_or_default();
+    let raffle_id = args.single::<String>().unwrap_or_default();
     let mut text = "".to_string();
     let file_name = format!("raffle_{}.export.txt", raffle_id).to_string();
 
@@ -52,7 +43,7 @@ pub async fn export(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
             fs::remove_file(file_name.clone()).expect("Error removing file");
 
         }
-        Err(e) => text = "Expecting: ```~export <raffle_id>```".to_string()
+        Err(_e) => text = "Expecting: ```~export <raffle_id>```".to_string()
     };
 
 

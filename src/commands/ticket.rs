@@ -1,20 +1,12 @@
-use std::{env, thread, time};
-
+use std::{env};
 use ascii_table::{Align, AsciiTable};
 use bson::oid::ObjectId;
-use log::*;
-use serde::de::Unexpected::Str;
-use serde_json::to_string;
 use serenity::framework::standard::{Args, CommandResult, macros::command};
-use serenity::http::CacheHttp;
-use serenity::model::guild::Target::User;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use structopt::StructOpt;
-
 use crate::api_helper;
 use crate::commands::message_end;
-use crate::model::{Raffle, Ticket};
+use crate::model::{Ticket};
 
 #[command]
 pub async fn ticket(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -23,12 +15,12 @@ pub async fn ticket(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
 
     let username = msg.author.nick_in(ctx, msg.guild_id.unwrap()).await.unwrap();
 
-    let mut text = match args.single::<String>().unwrap_or_default().as_str() {
-        "me" => me(msg, username).await,
+    let text = match args.single::<String>().unwrap_or_default().as_str() {
+        "me" => me(username).await,
         "add" => if args.len() == 3 {
-            add(msg, args, username).await
+            add(args, username).await
         } else { "Expecting: ```~ticket add <raffle_id> <spl_tx_signature>```".to_string() }
-        "list" => list(ctx, msg).await,
+        "list" => list().await,
         "delete" => if args.len() == 2 {
             "NOT-Implemented".to_string()
         } else { "Expecting: ```~ticket delete <raffle_id>```".to_string() },
@@ -43,7 +35,7 @@ pub async fn ticket(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
 }
 
 
-pub async fn add(msg: &Message, mut args: Args, username: String) -> String {
+pub async fn add(mut args: Args, username: String) -> String {
     let raffle_id = args.single::<String>().unwrap();
     let spl_address = args.single::<String>().unwrap();
 
@@ -61,7 +53,7 @@ pub async fn add(msg: &Message, mut args: Args, username: String) -> String {
     text
 }
 
-pub async fn me(ctx: &Message, username: String) -> String {
+pub async fn me(username: String) -> String {
     let raffles = api_helper::get_raffle("0".to_owned()).await.unwrap();
     let tickets = api_helper::get_ticket("0".to_owned()).await.unwrap();
 
@@ -99,7 +91,7 @@ pub async fn me(ctx: &Message, username: String) -> String {
     text
 }
 
-pub async fn list(ctx: &Context, msg: &Message) -> String {
+pub async fn list() -> String {
     let raffles = api_helper::get_raffle("0".to_owned()).await.unwrap();
     let tickets = api_helper::get_ticket("0".to_owned()).await.unwrap();
 

@@ -1,13 +1,3 @@
-//! Requires the 'framework' feature flag be enabled in your project's
-//! `Cargo.toml`.
-//!
-//! This can be enabled by specifying the feature in the dependency section:
-//!
-//! ```toml
-//! [dependencies.serenity]
-//! git = "https://github.com/serenity-rs/serenity.git"
-//! features = ["framework", "standard_framework"]
-//! ```
 use std::{collections::HashSet, env, sync::Arc};
 use std::time::Duration;
 
@@ -20,7 +10,6 @@ use serenity::{
     prelude::*,
 };
 use serenity::model::id::GuildId;
-use serenity::model::prelude::MessageId;
 use tracing::{error, info};
 
 use commands::{help::*, output::*, raffle::*, status::*, ticket::*};
@@ -57,7 +46,7 @@ impl EventHandler for Handler {
             let mut message_id: u64 = 0;
             loop {
                 if env::var("UPDATE_STATUS").unwrap_or("true".to_string()).parse::<bool>().unwrap() {
-                    status::change_status_message(&ctx.http, &_guilds, &mut message_id).await;
+                    status::change_status_message(&ctx.http, &mut message_id).await;
                     info!("Message posted");
                     env::set_var("UPDATE_STATUS", "false");
                 }

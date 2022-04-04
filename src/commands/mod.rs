@@ -1,12 +1,7 @@
 use std::{env, thread, time};
-
-use serenity::builder::CreateEmbed;
 use serenity::framework::standard::CommandResult;
-use serenity::http::Typing;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-
-
 
 pub mod help;
 pub mod raffle;
@@ -14,7 +9,7 @@ pub mod ticket;
 pub mod status;
 pub mod output;
 
-async fn message_begin(ctx: &&Context, msg: &Message) -> CommandResult {
+async fn message_begin() -> CommandResult {
     if env::var("DELETE_MESSAGE").unwrap_or("false".to_string()).contains("true") {
         //    typing = msg.channel_id.start_typing(&ctx.http)?;
     }

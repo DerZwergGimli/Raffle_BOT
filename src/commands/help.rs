@@ -1,12 +1,12 @@
 use serenity::client::Context;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
+use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::channel::Message;
 use crate::commands::{message_begin, message_end};
 
 #[command]
-pub async fn help(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    message_begin(&ctx, msg).await;
-    let typing= msg.channel_id.start_typing(&ctx.http)?;
+pub async fn help(ctx: &Context, msg: &Message) -> CommandResult {
+    message_begin().await;
+    msg.channel_id.start_typing(&ctx.http)?;
 
     let mut text = String::new();
     text.push_str(format!("**RaffleBOT Help:**\n").as_ref());
