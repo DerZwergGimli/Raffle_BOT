@@ -47,6 +47,7 @@ pub async fn raffle(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
 
     typing.stop();
     message_end(&ctx, msg, text).await;
+    env::set_var("UPDATE_STATUS", "true");
 
     Ok(())
 }

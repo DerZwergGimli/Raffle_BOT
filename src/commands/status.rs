@@ -109,8 +109,10 @@ async fn build_status_message() -> String {
         let mut table: Vec<[String; 3]> = Vec::new();
 
         let emote_state = match raffle.status.as_str() {
-            "created" => ":octagonal_sign:".to_string(),
-            _ => "error".to_string()
+            "created" => ":yellow_circle:".to_string(),
+            "running" => ":green_circle:".to_string(),
+            "stopped" => ":red_circle:".to_string(),
+            _ => "red_circle".to_string()
         };
 
         text.push_str(format!("**{}** - {} {}\n", raffle.title, raffle.id, emote_state).as_ref());

@@ -1,4 +1,4 @@
-use std::{thread, time};
+use std::{env, thread, time};
 
 use ascii_table::{Align, AsciiTable};
 use bson::oid::ObjectId;
@@ -42,6 +42,7 @@ pub async fn ticket(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
     //msg.channel_id.delete_message(&ctx.http, msg_id).await?;
     typing.stop();
     message_end(&ctx, msg, text).await;
+    env::set_var("UPDATE_STATUS", "true");
 
     Ok(())
 }

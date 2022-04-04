@@ -23,7 +23,7 @@ use serenity::model::id::GuildId;
 use serenity::model::prelude::MessageId;
 use tracing::{error, info};
 
-use commands::{help::*, raffle::*, status::*, ticket::*, output::*};
+use commands::{help::*, output::*, raffle::*, status::*, ticket::*};
 
 use crate::commands::status;
 
@@ -56,12 +56,14 @@ impl EventHandler for Handler {
             info!("Starting message update loop...");
             let mut message_id: u64 = 0;
             loop {
-                status::change_status_message(&ctx.http, &_guilds, &mut message_id).await;
-                info!("Message posted");
+                if env::var("UPDATE_STATUS").unwrap_or("true".to_string()).parse::<bool>().unwrap() {
+                    status::change_status_message(&ctx.http, &_guilds, &mut message_id).await;
+                    info!("Message posted");
+                    env::set_var("UPDATE_STATUS", "false");
+                }
                 tokio::time::sleep(Duration::from_secs(sleep_time)).await;
             }
         }
-
     }
 }
 
@@ -84,15 +86,15 @@ async fn main() {
         match api_helper::get_raffle("0".to_owned()).await {
             Ok(_) => {
                 info!("API-Connected gonna continue");
-                break
-            },
+                break;
+            }
             Err(e) => {
                 error!("Unable to connect to API: {}",e);
                 info!("Retrying after 10s");
-                tokio::time::sleep(Duration::from_secs(10)).await;}
+                tokio::time::sleep(Duration::from_secs(10)).await;
+            }
         };
     }
-
 
 
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
