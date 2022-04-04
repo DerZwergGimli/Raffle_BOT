@@ -35,11 +35,6 @@ pub async fn ticket(ctx: &Context, msg: &Message, mut args: Args) -> CommandResu
         _ => "Expecting: ```~ticket <me/add/list/delete>```".to_string()
     };
 
-    //text.push_str("\n> this message will destruct in 5s");
-    //let msg_id = msg.channel_id.say(&ctx.http, text).await?;
-    //Wait until message delete
-    //thread::sleep(time::Duration::from_secs(10));
-    //msg.channel_id.delete_message(&ctx.http, msg_id).await?;
     typing.stop();
     message_end(&ctx, msg, text).await;
     env::set_var("UPDATE_STATUS", "true");
